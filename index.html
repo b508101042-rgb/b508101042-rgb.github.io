@@ -7,7 +7,6 @@
 <title>NephroExam 腎臟專科題庫</title>
 
 <style>
-
 body{
     font-family:-apple-system,BlinkMacSystemFont,sans-serif;
     background:#f5f5f5;
@@ -45,6 +44,7 @@ h1{
     border:none;
     border-radius:10px;
     background:#ececec;
+    cursor: pointer;
 }
 
 .correct{
@@ -60,6 +60,7 @@ h1{
     padding:15px;
     background:#eef5ff;
     border-radius:10px;
+    display: none; /* 💡 修正 1：預設隱藏，避免空內容時撐出空白塊 */
 }
 
 .nextBtn{
@@ -71,202 +72,121 @@ h1{
     border-radius:10px;
     background:#2563eb;
     color:white;
+    cursor: pointer;
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="container">
+    <h1>🩺 NephroExam</h1>
 
-<h1>🩺 NephroExam</h1>
+    <div class="stats">
+        作答：<span id="total">0</span> ｜
+        答對：<span id="correctCount">0</span> ｜
+        正確率：<span id="rate">0</span>%
+    </div>
 
-<div class="stats">
-作答：
-<span id="total">0</span>
-
-｜答對：
-<span id="correctCount">0</span>
-
-｜正確率：
-<span id="rate">0</span>%
-</div>
-
-<div class="card">
-
-<h3 id="question"></h3>
-
-<div id="options"></div>
-
-<div id="explanation"></div>
-
-<button class="nextBtn"
-onclick="nextQuestion()">
-下一題
-</button>
-
-</div>
-
+    <div class="card">
+        <h3 id="question">正在載入題目...</h3>
+        <div id="options"></div>
+        <div id="explanation"></div>
+        <button class="nextBtn" onclick="nextQuestion()">下一題</button>
+    </div>
 </div>
 
 <script>
-
-const questions=[
-
-{
-question:"依KDIGO定義，下列何者符合AKI？",
-options:[
-"48小時內Cr上升0.2 mg/dL",
-"48小時內Cr上升0.3 mg/dL",
-"7天內Cr上升20%",
-"eGFR下降10%"
-],
-answer:1,
-explanation:
-"KDIGO定義AKI：48小時內Cr增加≥0.3 mg/dL，或7天內增加至基線1.5倍以上。"
-},
-
-{
-question:"Prerenal AKI最典型FENa？",
-options:[
-">2%",
-"<1%",
-">5%",
-"正常"
-],
-answer:1,
-explanation:
-"Prerenal AKI時腎臟保留鈉離子，因此FENa通常<1%。"
-},
-
-{
-question:"高血鉀合併Peaked T wave第一步處置？",
-options:[
-"Insulin",
-"Calcium gluconate",
-"Dialysis",
-"Sodium bicarbonate"
-],
-answer:1,
-explanation:
-"Calcium gluconate可立即穩定心肌細胞膜。"
-},
-
-{
-question:"ATN最典型尿沉渣為？",
-options:[
-"RBC cast",
-"Muddy brown cast",
-"Fatty cast",
-"WBC cast"
-],
-answer:1,
-explanation:
-"ATN最典型為muddy brown granular cast。"
-},
-
-{
-question:"CKD病人延緩腎功能惡化首選藥物？",
-options:[
-"NSAID",
-"ACEi/ARB",
-"Metformin",
-"Aspirin"
-],
-answer:1,
-explanation:
-"ACEi/ARB可減少蛋白尿並延緩CKD進展。"
-}
-
+const questions = [
+    {
+        question:"依KDIGO定義，下列何者符合AKI？",
+        options:["48小時內Cr上升0.2 mg/dL","48小時內Cr上升0.3 mg/dL","7天內Cr上升20%","eGFR下降10%"],
+        answer:1,
+        explanation:"KDIGO定義AKI：48小時內Cr增加≥0.3 mg/dL，或7天內增加至基線1.5倍以上。"
+    },
+    {
+        question:"Prerenal AKI最典型FENa？",
+        options:[">2%","<1%",">5%","正常"],
+        answer:1,
+        explanation:"Prerenal AKI時腎臟保留鈉離子，因此FENa通常<1%。"
+    },
+    {
+        question:"高血鉀合併Peaked T wave第一步處置？",
+        options:["Insulin","Calcium gluconate","Dialysis","Sodium bicarbonate"],
+        answer:1,
+        explanation:"Calcium gluconate可立即穩定心肌細胞膜。"
+    },
+    {
+        question:"ATN最典型尿沉渣為？",
+        options:["RBC cast","Muddy brown cast","Fatty cast","WBC cast"],
+        answer:1,
+        explanation:"ATN最典型為muddy brown granular cast。"
+    },
+    {
+        question:"CKD病人延緩腎功能惡化首選藥物？",
+        options:["NSAID","ACEi/ARB","Metformin","Aspirin"],
+        answer:1,
+        explanation:"ACEi/ARB可減少蛋白尿並延緩CKD進展。"
+    }
 ];
 
 let currentQuestion;
-
-let total=0;
-let correct=0;
+let total = 0;
+let correct = 0;
 
 function nextQuestion(){
+    // 💡 修正 2：下一題時，清空內容並隱藏詳解區塊
+    const expDiv = document.getElementById("explanation");
+    expDiv.innerHTML = "";
+    expDiv.style.display = "none"; 
 
-document.getElementById("explanation").innerHTML="";
+    currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+    document.getElementById("question").innerHTML = currentQuestion.question;
 
-currentQuestion=
-questions[
-Math.floor(Math.random()*questions.length)
-];
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
 
-document.getElementById("question")
-.innerHTML=currentQuestion.question;
+    currentQuestion.options.forEach(function(option, index){
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.innerText = option;
+        btn.onclick = function(){
+            checkAnswer(index, btn);
+        };
+        optionsDiv.appendChild(btn);
+    });
+}
 
-const optionsDiv=
-document.getElementById("options");
+function checkAnswer(selected, btn){
+    const buttons = document.querySelectorAll(".option");
+    buttons.forEach(function(b){
+        b.disabled = true;
+    });
 
-optionsDiv.innerHTML="";
+    total++;
 
-currentQuestion.options.forEach(
-function(option,index){
+    if(selected === currentQuestion.answer){
+        btn.classList.add("correct");
+        correct++;
+    } else {
+        btn.classList.add("wrong");
+        buttons[currentQuestion.answer].classList.add("correct");
+    }
 
-const btn=
-document.createElement("button");
+    document.getElementById("total").innerText = total;
+    document.getElementById("correctCount").innerText = correct;
+    document.getElementById("rate").innerText = Math.round(correct / total * 100);
 
-btn.className="option";
+    // 💡 修正 3：作答後，顯示詳解區塊並填入內容
+    const expDiv = document.getElementById("explanation");
+    expDiv.innerHTML = "<b>詳解：</b><br><br>" + currentQuestion.explanation;
+    expDiv.style.display = "block"; 
+}
 
-btn.innerText=option;
-
-btn.onclick=function(){
-checkAnswer(index,btn);
+// 💡 修正 4：確保 HTML 元素完全載入後，再執行第一題的初始化
+window.onload = function() {
+    nextQuestion();
 };
-
-optionsDiv.appendChild(btn);
-
-});
-}
-
-function checkAnswer(selected,btn){
-
-const buttons=
-document.querySelectorAll(".option");
-
-buttons.forEach(function(b){
-b.disabled=true;
-});
-
-total++;
-
-if(selected===currentQuestion.answer){
-
-btn.classList.add("correct");
-
-correct++;
-
-}else{
-
-btn.classList.add("wrong");
-
-buttons[currentQuestion.answer]
-.classList.add("correct");
-
-}
-
-document.getElementById("total")
-.innerText=total;
-
-document.getElementById("correctCount")
-.innerText=correct;
-
-document.getElementById("rate")
-.innerText=
-Math.round(correct/total*100);
-
-document.getElementById("explanation")
-.innerHTML=
-"<b>詳解：</b><br><br>"
-+
-currentQuestion.explanation;
-}
-
-nextQuestion();
-
 </script>
 
 </body>
